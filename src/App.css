@@ -1,0 +1,382 @@
+/* ==== GLOBAL ==== */
+:root {
+  --bg-body: #f3f4f6;
+  --bg-card: #ffffff;
+  --bg-soft: #e5e7eb;
+  --accent: #0ea5e9;
+  --accent-soft: #dbeafe;
+  --text-main: #0f172a;
+  --text-muted: #6b7280;
+  --radius-lg: 1.25rem;
+  --shadow-soft: 0 10px 25px rgba(15, 23, 42, 0.12);
+  --transition-fast: 180ms ease-out;
+  --border-soft: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: var(--bg-body);
+  color: var(--text-main);
+}
+
+a {
+  color: inherit;
+}
+
+/* ==== ROOT & LAYOUT ==== */
+
+#root {
+  min-height: 100vh;
+}
+
+.app-root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg, #f9fafb 0%, #e0f2fe 40%, #f9fafb 100%);
+}
+
+/* ==== HEADER ==== */
+
+.app-header {
+  padding: 16px 20px 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+  background: rgba(248, 250, 252, 0.9);
+  backdrop-filter: blur(12px);
+}
+
+.app-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.logo-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: conic-gradient(
+    from 180deg,
+    #22c55e,
+    #0ea5e9,
+    #6366f1,
+    #f97316,
+    #22c55e
+  );
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.25);
+}
+
+.logo-text {
+  white-space: nowrap;
+}
+
+.app-tagline {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ==== MAIN CONTENT ==== */
+
+.main-content {
+  flex: 1;
+  padding: 12px 16px 72px; /* ada space utk bottom nav di mobile */
+}
+
+/* center & batasi lebar konten di layar besar */
+@media (min-width: 768px) {
+  .main-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 24px 88px;
+  }
+}
+
+/* ==== PAGE GENERIC ==== */
+
+.page {
+  padding-top: 4px;
+}
+
+.page h1 {
+  font-size: 1.6rem;
+  margin: 0 0 6px;
+}
+
+.page h2 {
+  font-size: 1.2rem;
+  margin: 18px 0 8px;
+}
+
+.page p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+/* ==== CARD LIST DESTINASI ==== */
+
+.card-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+@media (min-width: 640px) {
+  .card-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  text-decoration: none;
+  border-radius: 18px;
+  overflow: hidden;
+  border: var(--border-soft);
+  box-shadow: var(--shadow-soft);
+  transform: translateY(0);
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.16);
+  border-color: rgba(59, 130, 246, 0.7);
+}
+
+.card img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+}
+
+.card > div {
+  padding: 11px 12px 13px;
+}
+
+.card h3 {
+  font-size: 0.98rem;
+  margin: 0 0 4px;
+  color: #0f172a;
+}
+
+.card p {
+  margin: 2px 0;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.card small {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* ==== DETAIL PAGE ==== */
+
+.detail-page {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-image {
+  width: 100%;
+  border-radius: 18px;
+  height: 260px;
+  object-fit: cover;
+  margin: 8px 0 4px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.25);
+}
+
+.detail-page p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.detail-page a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 9px 14px;
+  font-size: 0.9rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: #0f172a;
+  text-decoration: none;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.detail-page a:hover {
+  background: #bfdbfe;
+  transform: translateY(-1px);
+}
+
+button {
+  font-family: inherit;
+}
+
+/* tombol back di detail */
+.detail-page > button:first-of-type {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  cursor: pointer;
+}
+
+/* tombol favorit */
+.favorite-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 12px 25px rgba(234, 88, 12, 0.4);
+  transition: transform var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.favorite-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgba(234, 88, 12, 0.55);
+}
+
+/* ==== FAVORITE EMPTY STATE ==== */
+
+.page p.empty-state {
+  text-align: center;
+  padding: 28px 12px 0;
+}
+
+/* ==== BOTTOM NAV (RESPONSIVE) ==== */
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px 12px 10px;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.16), transparent);
+  display: flex;
+  justify-content: center;
+  z-index: 20;
+}
+
+.bottom-nav-inner {
+  /* gunakan kalau mau bungkus, tapi di JSX kita langsung pakai .bottom-nav saja */
+}
+
+.bottom-nav .nav-item {
+  flex: 1;
+  max-width: 120px;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  text-decoration: none;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  backdrop-filter: blur(18px);
+  transition: background var(--transition-fast), color var(--transition-fast),
+    transform var(--transition-fast), border-color var(--transition-fast);
+  margin: 0 3px;
+}
+
+.nav-icon {
+  font-size: 1.1rem;
+}
+
+.nav-label {
+  line-height: 1;
+}
+
+.nav-item--active {
+  background: radial-gradient(circle at top, #22c55e 0, #0ea5e9 40%, #1d4ed8 100%);
+  color: white;
+  border-color: rgba(248, 250, 252, 0.9);
+  transform: translateY(-2px);
+}
+
+.nav-item:not(.nav-item--active):hover {
+  background: rgba(15, 23, 42, 0.8);
+  color: #e5e7eb;
+}
+
+/* NAV versi desktop: jadikan lebih ramping & tidak memenuhi bawah layar */
+
+@media (min-width: 768px) {
+  .bottom-nav {
+    justify-content: center;
+    padding: 12px 0 16px;
+  }
+
+  .bottom-nav {
+    background: transparent;
+  }
+
+  .bottom-nav::before {
+    display: none;
+  }
+
+  .bottom-nav {
+    /* bar nav melayang di tengah bawah */
+  }
+
+  .nav-item {
+    max-width: none;
+    padding: 8px 14px;
+    flex-direction: row;
+    gap: 6px;
+    font-size: 0.82rem;
+  }
+
+  .nav-icon {
+    font-size: 1rem;
+  }
+}

@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Tambahan untuk scrollbar tersembunyi tapi tetap bisa discroll */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+body {
+    background-color: #f9fafb; /* gray-50 */
+}
