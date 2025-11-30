@@ -1,154 +1,167 @@
 // src/services/destinationService.js
-import { supabase } from "../config/supabase";
+import { supabase } from '../config/supabase';
 
-/**
- * Ambil semua destinasi (untuk Beranda / Kategori)
- * Tabel: destinations
- */
-export async function getDestinations(category = "Semua") {
-  let query = supabase.from("destinations").select("*");
+// --- HELPER: Hitung Rata-rata Rating ---
+const calculateRating = (reviews) => {
+  if (!reviews || reviews.length === 0) return 0;
+  const total = reviews.reduce((acc, curr) => acc + curr.rating, 0);
+  return (total / reviews.length).toFixed(1);
+};
 
-  if (category && category !== "Semua") {
-    query = query.eq("category", category);
+// 1. Ambil Semua Destinasi
+export const getDestinations = async (category) => {
+  let query = supabase
+    .from('destinations')
+    .select('*, reviews(rating)');
+
+  if (category && category !== 'Semua') {
+    query = query.eq('category', category);
   }
 
-  const { data, error } = await query.order("id", { ascending: true });
+  const { data, error } = await query;
+  if (error) throw error;
 
-  if (error) {
-    console.error("Gagal ambil destinasi:", error);
-    throw error;
-  }
+  return data.map((item) => ({
+    ...item,
+    rating: calculateRating(item.reviews),
+    reviewCount: item.reviews ? item.reviews.length : 0
+  }));
+};
 
-  return data || [];
-}
-
-/**
- * Ambil detail 1 destinasi
- * Tabel: destinations
- */
-export async function getDestinationDetail(id) {
-  if (!id) return null;
-
+// 2. Ambil Detail Destinasi
+export const getDestinationDetail = async (id) => {
   const { data, error } = await supabase
-    .from("destinations")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+    .from('destinations')
+    .select('*, reviews(rating)')
+    .eq('id', id)
+    .single();
 
-  if (error) {
-    console.error("Gagal ambil detail destinasi:", error);
-    throw error;
-  }
+  if (error) throw error;
 
-  return data || null;
-}
+  return {
+    ...data,
+    rating: calculateRating(data.reviews),
+    reviewCount: data.reviews ? data.reviews.length : 0
+  };
+};
 
-/**
- * Ambil daftar favorit user tertentu.
- *
- * Struktur tabel favorites (dari screenshot):
- * - id             int8
- * - user_id        uuid
- * - destination_id int8
- * - name           text
- * - location       text
- * - price          text
- * - imageUrl       text
- */
-export async function getFavorites(userId) {
-  if (!userId) return [];
-
-  const { data, error } = await supabase
-    .from("favorites")
+// 3. Ambil Destinasi Favorit (PERBAIKAN UTAMA DI SINI)
+export const getFavorites = async (userId) => {
+  // A. Ambil Data Favorit
+  const { data: favs, error } = await supabase
+    .from('favorites')
     .select(`
       id,
       user_id,
       destination_id,
-      name,
-      location,
-      price,
-      imageUrl
+      destinations (*)
     `)
-    .eq("user_id", userId)
-    .order("id", { ascending: false });
+    .eq('user_id', userId);
 
-  if (error) {
-    console.error("Gagal ambil favorit:", error);
-    throw error;
+  if (error) throw error;
+  if (!favs || favs.length === 0) return [];
+
+  // B. Ambil Semua Review terkait
+  const destIds = favs.map(f => f.destination_id);
+  
+  const { data: reviews } = await supabase
+    .from('reviews')
+    .select('destination_id, rating')
+    .in('destination_id', destIds);
+
+  // C. Gabungkan (Match)
+  return favs.map((item) => {
+    const realDest = item.destinations;
+    
+    // PERBAIKAN: Gunakan Number() agar "4" (string) dianggap sama dengan 4 (number)
+    const relatedReviews = reviews 
+      ? reviews.filter(r => Number(r.destination_id) === Number(item.destination_id)) 
+      : [];
+
+    const dynamicRating = realDest ? calculateRating(relatedReviews) : 0;
+
+    return {
+      id: item.id,
+      destination_id: item.destination_id,
+      name: realDest ? realDest.name : "Destinasi Tidak Ditemukan",
+      location: realDest ? realDest.location : "-",
+      price: realDest ? realDest.price : "-",
+      imageUrl: realDest ? realDest.imageUrl : "",
+      category: realDest ? realDest.category : "",
+      rating: dynamicRating // Rating sekarang pasti terisi
+    };
+  });
+};
+
+// 4. Toggle Favorite
+export const toggleFavorite = async (userId, destination) => {
+  const { data: existing } = await supabase
+    .from('favorites')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('destination_id', destination.id)
+    .single();
+
+  if (existing) {
+    const { error } = await supabase.from('favorites').delete().eq('id', existing.id);
+    if (error) throw error;
+    return 'removed';
+  } else {
+    const { error } = await supabase.from('favorites').insert([
+      {
+        user_id: userId,
+        destination_id: destination.id,
+        name: destination.name,
+        location: destination.location,
+        price: destination.price,
+        imageUrl: destination.imageUrl,
+      },
+    ]);
+    if (error) throw error;
+    return 'added';
   }
+};
 
-  return (data || []).map((row) => ({
-    id: row.id,
-    user_id: row.user_id,
-    destination_id: row.destination_id,
-    name: row.name,
-    location: row.location,
-    price: row.price,
-    imageUrl: row.imageUrl,
-  }));
-}
+// --- FITUR REVIEW ---
 
-/**
- * Toggle favorit:
- *  - kalau sudah ada (user_id + destination_id) → hapus
- *  - kalau belum ada → insert
- *
- * Saat insert, kita sekalian simpan:
- *  - name, location, price, imageUrl
- * supaya halaman Favorit bisa tampil tanpa join ke tabel destinations.
- */
-export async function toggleFavorite(userId, destination) {
-  if (!userId) throw new Error("User belum login");
-  if (!destination || !destination.id) {
-    throw new Error("Data destinasi tidak valid.");
-  }
+// 5. Ambil List Review
+export const getReviewsByDestination = async (destinationId) => {
+  const destId = Number(destinationId);
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('*')
+    .eq('destination_id', destId)
+    .order('created_at', { ascending: false });
 
-  const destId = destination.id;
+  if (error) throw error;
+  return data;
+};
 
-  // Cek apakah sudah ada di favorites
-  const { data: existing, error: checkError } = await supabase
-    .from("favorites")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("destination_id", destId)
-    .maybeSingle();
+// 6. Kirim Review Baru
+export const addReview = async (reviewData) => {
+  const { data, error } = await supabase
+    .from('reviews')
+    .insert([
+      {
+        destination_id: Number(reviewData.destination_id),
+        user_id: reviewData.user_id,
+        user_name: reviewData.user_name,
+        rating: reviewData.rating,
+        comment: reviewData.comment
+      }
+    ])
+    .select();
 
-  if (checkError && checkError.code !== "PGRST116") {
-    console.error("Gagal cek favorit:", checkError);
-    throw checkError;
-  }
+  if (error) throw error;
+  return data;
+};
 
-  // Kalau sudah ada → hapus
-  if (existing && existing.id) {
-    const { error: delError } = await supabase
-      .from("favorites")
-      .delete()
-      .eq("id", existing.id);
+// 7. Hapus Review
+export const deleteReview = async (reviewId) => {
+  const { error } = await supabase
+    .from('reviews')
+    .delete()
+    .eq('id', reviewId);
 
-    if (delError) {
-      console.error("Gagal menghapus favorit:", delError);
-      throw delError;
-    }
-
-    return { status: "removed" };
-  }
-
-  // Kalau belum ada → insert baris baru
-  const payload = {
-    user_id: userId,
-    destination_id: destId,
-    name: destination.name ?? null,
-    location: destination.location ?? null,
-    price: destination.price ?? null,
-    imageUrl: destination.imageUrl ?? null,
-  };
-
-  const { error: insertError } = await supabase.from("favorites").insert(payload);
-
-  if (insertError) {
-    console.error("Gagal menambah favorit:", insertError);
-    throw insertError;
-  }
-
-  return { status: "added" };
-}
+  if (error) throw error;
+};
