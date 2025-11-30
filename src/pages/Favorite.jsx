@@ -45,7 +45,7 @@ export default function Favorite() {
         
         {/* View Tamu */}
         {isGuest && (
-          <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-200 mx-auto max-w-2xl">
+          <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-200 mx-auto max-w">
             <div className="bg-white p-6 rounded-full shadow-sm mb-6">
               <UserIcon className="text-gray-300" size={48} />
             </div>
