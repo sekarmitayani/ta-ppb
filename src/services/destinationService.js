@@ -165,3 +165,32 @@ export const deleteReview = async (reviewId) => {
 
   if (error) throw error;
 };
+// ... (kode sebelumnya tetap ada) ...
+
+// --- FITUR ADMIN (CRUD) ---
+
+// 8. Tambah Destinasi Baru
+export const createDestination = async (data) => {
+  const { error } = await supabase
+    .from('destinations')
+    .insert([data]);
+  if (error) throw error;
+};
+
+// 9. Update Destinasi
+export const updateDestination = async (id, data) => {
+  const { error } = await supabase
+    .from('destinations')
+    .update(data)
+    .eq('id', id);
+  if (error) throw error;
+};
+
+// 10. Hapus Destinasi
+export const deleteDestination = async (id) => {
+  const { error } = await supabase
+    .from('destinations')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+};

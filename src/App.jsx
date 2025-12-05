@@ -9,6 +9,7 @@ import DestinasiBudaya from "./pages/DestinasiBudaya.jsx";
 import DetailPage from "./pages/DetailPage.jsx";
 import Favorite from "./pages/Favorite.jsx";
 import Profile from "./pages/Profile.jsx";
+import AdminPage from "./pages/AdminPage.jsx";
 
 // Context User
 export const UserContext = React.createContext({
@@ -134,6 +135,7 @@ export default function App() {
             <Route path="/detail/:id" element={<DetailPage />} />
             <Route path="/favorites" element={<Favorite />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/admin" element={<AdminPage />}/>
           </Routes>
         </main>
 
